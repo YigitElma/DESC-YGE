@@ -97,9 +97,6 @@ jobs:
           source .venv-${{ env.version }}/bin/activate
           python -m pytest -v -m regression\
             --durations=0 \
-            --cov-report xml:cov.xml \
-            --cov-config=setup.cfg \
-            --cov=desc/ \
             --mpl \
             --mpl-results-path=mpl_results.html \
             --mpl-generate-summary=html \
@@ -107,23 +104,3 @@ jobs:
             --group ${{ matrix.group }} \
             --splitting-algorithm least_duration \
             --db ./prof.db
-
-      - name: save coverage file and plot comparison results
-        if: always() && env.has_changes == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression_test_artifact-${{ matrix.python-version }}-${{ matrix.group }}
-          path: |
-            ./cov.xml
-            ./mpl_results.html
-            ./prof.db
-
-      - name: Upload coverage
-        if: env.has_changes == 'true'
-        id : codecov
-        uses: codecov/codecov-action@v5
-        with:
-          name: codecov-umbrella
-          files: ./cov.xml
-          fail_ci_if_error: true
-          verbose: true
