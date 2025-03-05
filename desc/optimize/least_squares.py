@@ -227,7 +227,7 @@ def lsqtr(  # noqa: C901
     tr_decrease_threshold = options.pop("tr_decrease_threshold", 0.25)
     tr_increase_ratio = options.pop("tr_increase_ratio", 2)
     tr_decrease_ratio = options.pop("tr_decrease_ratio", 0.25)
-    tr_method = options.pop("tr_method", "qr")
+    tr_method = options.pop("tr_method", "cho")
 
     errorif(
         len(options) > 0,
