@@ -45,7 +45,8 @@ jobs:
           filters: |
             has_changes:
               - 'desc/**'
-              - 'tests/benchmarks/**'
+              - 'tests/benchmarks/benchmark_cpu_small.py'
+              - 'tests/benchmarks/compare_bench_results.py'
               - 'setup.cfg'
               - '.github/workflows/benchmark.yml'
 
