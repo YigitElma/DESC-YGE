@@ -3,11 +3,11 @@
 import subprocess
 import time
 import threading
-import matplotlib.pyplot as plt
-import numpy as np
+import pickle
 import psutil
 import gc
 import sys
+import numpy as np
 
 
 def monitor_ram(proc, interval, ram_usage, timestamps):
@@ -74,8 +74,7 @@ if __name__ == "__main__":
     interval = 0.1  # seconds between samples
     res = 7
 
-    mem_usage = []
-    ts = []
+    data = {}
 
     funs = [
         "proximal_freeb_compute",
@@ -83,6 +82,9 @@ if __name__ == "__main__":
     ]
 
     for i in range(len(funs)):
+        print(f"Running {funs[i]}...")
+        mem = []
+        t = []
         gc.collect()
         # start the sampler thread
         # launch the script to be profiled
@@ -90,7 +92,7 @@ if __name__ == "__main__":
         target = monitor_vram if mode == "GPU" else monitor_ram
         sampler = threading.Thread(
             target=target,
-            args=(child, interval, mem_usage, ts),
+            args=(child, interval, mem, t),
             daemon=True,
         )
         sampler.start()
@@ -98,22 +100,10 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
+        data[funs[i]] = {}
+        data[funs[i]]["mem"] = np.array(mem) - min(mem)
+        data[funs[i]]["t"] = np.array(t) - t[0]  # to start at 0
 
     branch = sys.argv[1]  # master or pr
-    # plotting
-    mem_usage = np.asarray(mem_usage)
-    mem_usage -= min(mem_usage)
-    times = np.asarray(ts) - ts[0]
-    np.savetxt(f"{branch}_memory.txt", mem_usage)
-    np.savetxt(f"{branch}_time.txt", times)
-
-    plt.figure(figsize=(15, 7))
-    plt.plot(times, mem_usage, label=mode, color="orange")
-    plt.xlabel("Time (s)", fontsize=20)
-    plt.ylabel("Memory Usage (MB)", fontsize=20)
-    plt.title(f"Memory usage")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(f"memory.png", dpi=300)
-    plt.show()
+    with open(f"{branch}.pickle", "wb") as f:
+        pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

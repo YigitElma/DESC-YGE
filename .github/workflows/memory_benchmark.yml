@@ -1,10 +1,9 @@
 name: Memory Benchmarks
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - master
-    types: [opened, synchronize]
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -126,6 +125,13 @@ jobs:
           python compare_mem_results.py
           cat commit_msg.txt
 
+      - name: Upload memory comparison plot
+        if: always() && env.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: compare-plot
+          path: tests/benchmarks/compare.png
+
       - name: Comment PR with the results
         if: env.has_changes == 'true'
         uses: thollander/actions-comment-pull-request@v3
@@ -133,12 +139,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           file-path: tests/benchmarks/commit_msg.txt
-          comment-tag: benchmark
+          comment-tag: memory-benchmark
 
       - name: Upload benchmark data
         if: always() && env.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark_artifact_${{ matrix.group }}
+          name: benchmark_artifact
           path: tests/benchmarks/.memory_benchmarks
           include-hidden-files: true
