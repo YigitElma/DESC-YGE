@@ -43,7 +43,7 @@ plt.savefig(PNG, dpi=100)
 
 # ---------- commit message ----------
 msg = f"### Memory benchmark result\n\n```diff\n"
-msg += f"| {'Test Name':^22} | {'Master':^22} | {'PR':^22} | {'Δ (MB)':^22} | {'%Δ':^22} |\n"
+msg += f"| {'Test Name':^22} | {'Master (MB)':^22} | {'PR (MB)':^22} | {'Δ (MB)':^22} | {'%Δ':^22} |\n"
 msg += f"| {'-'*22} | {'-'*22} | {'-'*22} | {'-'*22} | {'-'*22} |\n"
 for i, name in enumerate(data_master.keys()):
     peak_pr = data_pr[name]["mem"].max()
@@ -52,7 +52,7 @@ for i, name in enumerate(data_master.keys()):
     percent_change = (delta / peak_ma) * 100
     sign = "-" if delta >= 0 else "+"
     msg += (
-        f"{sign} {name:^22} | {peak_ma:^22.1f} | {peak_pr:^22.1f} |"
+        f"{sign} {name:>22} | {peak_ma:^22.1f} | {peak_pr:^22.1f} |"
         + f" {sign}{abs(delta):^22.1f} | {sign}{abs(percent_change):^22.2f}% |\n"
     )
 msg += f"```"
