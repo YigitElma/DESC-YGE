@@ -80,11 +80,9 @@ if __name__ == "__main__":
     funs = [
         "proximal_freeb_compute",
         "proximal_freeb_jac",
-        "proximal_freeb_compute",
-        "proximal_freeb_jac",
     ]
 
-    for i in range(4):
+    for i in range(len(funs)):
         gc.collect()
         # start the sampler thread
         # launch the script to be profiled

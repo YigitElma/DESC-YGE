@@ -32,6 +32,7 @@ plt.savefig(PNG, dpi=150)
 peak_pr = float(mpr.max())
 peak_ma = float(mma.max())
 delta = peak_pr - peak_ma
+percent_change = (delta / peak_ma) * 100
 sign = "+" if delta >= 0 else "-"
 
 # ---------- commit message ----------
@@ -39,11 +40,9 @@ with open("commit_msg.txt", "w") as fh:
     fh.write(
         f"""### Memory benchmark result
 
-| metric          | master | PR | Δ |
-|-----------------|:------:|:--:|---:|
-| **peak RSS [MB]** | {peak_ma:.1f} | **{peak_pr:.1f}** | {sign}{abs(delta):.1f} |
-
-A positive Δ means the pull request uses more memory.
+| metric          | master | PR | Δ   | % Δ |
+|-----------------|:------:|:--:|---:|----:|
+| **peak RSS [MB]** | {peak_ma:.1f} | **{peak_pr:.1f}** | {sign}{abs(delta):.1f} | {sign}{abs(percent_change):.2f}% |
 
 _Detailed timeline is available in the “Memory Benchmarks / benchmark” check summary._
 """
