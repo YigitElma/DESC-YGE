@@ -41,30 +41,30 @@ plt.tight_layout()
 PNG = "compare.png"
 plt.savefig(PNG, dpi=100)
 
-# # environment variable passed from workflow
-# run_id = os.environ.get("GITHUB_RUN_ID")
-# repo = os.environ.get("GITHUB_REPOSITORY")
+# environment variable passed from workflow
+run_id = os.environ.get("GITHUB_RUN_ID")
+repo = os.environ.get("GITHUB_REPOSITORY")
 
-# # GitHub artifact URL (raw links are not stable unless served via Pages)
-# image_url = f"https://github.com/{repo}/actions/runs/{run_id}/artifacts"
+# GitHub artifact URL (raw links are not stable unless served via Pages)
+image_url = f"https://github.com/{repo}/actions/runs/{run_id}/artifacts"
 
 # ---------- commit message ----------
 msg = f"### Memory benchmark result\n\n```diff\n"
-msg += f"| {'Test Name':^22} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^18} | {'%Δ':^18} |\n"
-msg += f"| {'-'*22} | {'-'*18} | {'-'*18} | {'-'*18} | {'-'*18} |\n"
+msg += f"| {'Test Name':^22} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^12} | {'%Δ':^12} |\n"
+msg += f"| {'-'*22} | {'-'*18} | {'-'*18} | {'-'*12} | {'-'*12} |\n"
 for i, name in enumerate(data_master.keys()):
     peak_pr = data_pr[name]["mem"].max()
     peak_ma = data_master[name]["mem"].max()
     delta = peak_pr - peak_ma
     sign = "-" if delta >= 0 else "+"
-    percent_change = sign + str(abs((delta / peak_ma) * 100)) + " %"
-    delta = sign + str(abs(delta))
+    percent_change = sign + f"{abs((delta / peak_ma) * 100):.2f}" + " %"
+    delta = sign + f"{abs(delta):.2f}"
     msg += (
         f"{sign} {name:<22} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
-        + f" {delta:^18} | {percent_change:^18} |\n"
+        + f" {delta:^12} | {percent_change:^12} |\n"
     )
 msg += f"```"
-# msg += f"\n\n![Memory plot]({image_url})\n"
+msg += f"\n\n[Memory plot]({image_url})\n"
 
 
 with open("commit_msg.txt", "w") as fh:
