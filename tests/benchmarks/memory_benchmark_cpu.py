@@ -100,13 +100,13 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
-        mems.append(mem - min(mem))
-        ts.append(t - t[0])
+        mems.append(np.array(mem) - min(mem))
+        ts.append(np.array(t) - t[0])
 
     branch = sys.argv[1]  # master or pr
     # plotting
-    mem_usage = np.asarray(mems)
-    times = np.asarray(ts)
+    mem_usage = np.array(mems)
+    times = np.array(ts)
     np.savetxt(f"{branch}_memory.txt", mem_usage)
     np.savetxt(f"{branch}_time.txt", times)
 
