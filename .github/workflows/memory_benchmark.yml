@@ -1,10 +1,6 @@
-name: Benchmarks
+name: Memory Benchmarks
 
 on:
-  pull_request_target:
-    branches:
-      - master
-    types: [opened, synchronize]
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -45,10 +41,9 @@ jobs:
           filters: |
             has_changes:
               - 'desc/**'
-              - 'tests/benchmarks/benchmark_cpu_small.py'
-              - 'tests/benchmarks/compare_bench_results.py'
+              - 'tests/benchmarks/**'
               - 'setup.cfg'
-              - '.github/workflows/benchmark.yml'
+              - '.github/workflows/memory_benchmark.yml'
 
       - name: Check for relevant changes
         id: check_changes
@@ -99,13 +94,7 @@ jobs:
         run: |
           source .venv-${{ env.version }}/bin/activate
           cd tests/benchmarks
-          python -m pytest benchmark_cpu_small.py -vv \
-            --benchmark-save='Latest_Commit' \
-            --durations=0 \
-            --benchmark-save-data \
-            --splits 2 \
-            --group ${{ matrix.group }} \
-            --splitting-algorithm least_duration
+          python memory_benchmarks_cpu.py pr
 
       - name: Checkout current master
         if: env.has_changes == 'true'
@@ -123,34 +112,7 @@ jobs:
         run: |
           source .venv-${{ env.version }}/bin/activate
           cd tests/benchmarks
-          python -m pytest benchmark_cpu_small.py -vv \
-            --benchmark-save='master' \
-            --durations=0 \
-            --benchmark-save-data \
-            --splits 2 \
-            --group ${{ matrix.group }} \
-            --splitting-algorithm least_duration
-
-      - name: Put benchmark results in same folder
-        if: env.has_changes == 'true'
-        run: |
-          source .venv-${{ env.version }}/bin/activate
-          pwd
-          cd tests/benchmarks
-          find .benchmarks/ -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 1 > temp1
-          find .benchmarks/ -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 2 | head -n 1 > temp2
-          t1=$(cat temp1)
-          t2=$(cat temp2)
-          mkdir compare_results
-          cp $t1 compare_results
-          cp $t2 compare_results
-
-      - name: Download artifact
-        if: always() && env.has_changes == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          pattern: benchmark_artifact_*
-          path: tests/benchmarks
+          python memory_benchmarks_cpu.py master
 
       - name: Compare latest commit results to the master branch results
         if: env.has_changes == 'true'
@@ -158,7 +120,7 @@ jobs:
           source .venv-${{ env.version }}/bin/activate
           cd tests/benchmarks
           pwd
-          python compare_bench_results.py
+          python compare_mem_results.py
           cat commit_msg.txt
 
       - name: Comment PR with the results
@@ -175,5 +137,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: benchmark_artifact_${{ matrix.group }}
-          path: tests/benchmarks/.benchmarks
+          path: tests/benchmarks/.memory_benchmarks
           include-hidden-files: true
