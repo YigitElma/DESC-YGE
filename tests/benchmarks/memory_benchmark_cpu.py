@@ -74,7 +74,7 @@ if __name__ == "__main__":
     interval = 0.1  # seconds between samples
     res = 7
 
-    mem_usage = []
+    mems = []
     ts = []
 
     funs = [
@@ -83,6 +83,8 @@ if __name__ == "__main__":
     ]
 
     for i in range(len(funs)):
+        mem = []
+        t = []
         gc.collect()
         # start the sampler thread
         # launch the script to be profiled
@@ -90,7 +92,7 @@ if __name__ == "__main__":
         target = monitor_vram if mode == "GPU" else monitor_ram
         sampler = threading.Thread(
             target=target,
-            args=(child, interval, mem_usage, ts),
+            args=(child, interval, mem, t),
             daemon=True,
         )
         sampler.start()
@@ -98,12 +100,13 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
+        mems.append(mem - min(mem))
+        ts.append(t - t[0])
 
     branch = sys.argv[1]  # master or pr
     # plotting
-    mem_usage = np.asarray(mem_usage)
-    mem_usage -= min(mem_usage)
-    times = np.asarray(ts) - ts[0]
+    mem_usage = np.asarray(mems)
+    times = np.asarray(ts)
     np.savetxt(f"{branch}_memory.txt", mem_usage)
     np.savetxt(f"{branch}_time.txt", times)
 
