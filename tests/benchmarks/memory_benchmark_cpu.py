@@ -3,11 +3,11 @@
 import subprocess
 import time
 import threading
-import matplotlib.pyplot as plt
-import numpy as np
+import pickle
 import psutil
 import gc
 import sys
+import numpy as np
 
 
 def monitor_ram(proc, interval, ram_usage, timestamps):
@@ -74,8 +74,7 @@ if __name__ == "__main__":
     interval = 0.1  # seconds between samples
     res = 7
 
-    mems = []
-    ts = []
+    data = {}
 
     funs = [
         "proximal_freeb_compute",
@@ -100,23 +99,9 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
-        mems.append(list(np.array(mem) - min(mem)))
-        ts.append(list(np.array(t) - t[0]))
+        data[funs[i]]["mem"] = np.array(mem)
+        data[funs[i]]["t"] = np.array(t)
 
     branch = sys.argv[1]  # master or pr
-    # plotting
-    mem_usage = np.array(mems)
-    times = np.array(ts)
-    np.savetxt(f"{branch}_memory.txt", mem_usage)
-    np.savetxt(f"{branch}_time.txt", times)
-
-    plt.figure(figsize=(15, 7))
-    plt.plot(times, mem_usage, label=mode, color="orange")
-    plt.xlabel("Time (s)", fontsize=20)
-    plt.ylabel("Memory Usage (MB)", fontsize=20)
-    plt.title(f"Memory usage")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(f"memory.png", dpi=300)
-    plt.show()
+    with open(f"{branch}.pickle", "wb") as f:
+        pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

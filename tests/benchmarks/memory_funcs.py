@@ -38,7 +38,7 @@ def test_proximal_freeb_compute(res):
         eq.change_resolution(res, res, res, 2 * res, 2 * res, 2 * res)
     field = ToroidalMagneticField(1.0, 1.0)  # just a dummy field for benchmarking
     objective = ObjectiveFunction(BoundaryError(eq, field=field))
-    constraint = ObjectiveFunction(ForceBalance(eq), jac_chunk_size=1)
+    constraint = ObjectiveFunction(ForceBalance(eq, jac_chunk_size=1))
     prox = ProximalProjection(objective, constraint, eq)
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
@@ -57,7 +57,7 @@ def test_proximal_freeb_jac(res):
         eq.change_resolution(res, res, res, 2 * res, 2 * res, 2 * res)
     field = ToroidalMagneticField(1.0, 1.0)  # just a dummy field for benchmarking
     objective = ObjectiveFunction(BoundaryError(eq, field=field))
-    constraint = ObjectiveFunction(ForceBalance(eq), jac_chunk_size=1)
+    constraint = ObjectiveFunction(ForceBalance(eq, jac_chunk_size=1))
     prox = ProximalProjection(objective, constraint, eq)
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
