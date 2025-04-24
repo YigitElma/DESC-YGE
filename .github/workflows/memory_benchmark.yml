@@ -1,10 +1,6 @@
 name: Memory Benchmarks
 
 on:
-  pull_request_target:
-    branches:
-      - master
-    types: [opened, synchronize]
   workflow_dispatch:
     inputs:
       debug_enabled:
