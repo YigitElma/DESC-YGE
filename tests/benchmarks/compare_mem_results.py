@@ -43,8 +43,8 @@ plt.savefig(PNG, dpi=100)
 
 # ---------- commit message ----------
 msg = f"### Memory benchmark result\n\n```diff\n"
-msg += f"| {'Test Name':^22} | {'Master (MB)':^22} | {'PR (MB)':^22} | {'Δ (MB)':^22} | {'%Δ':^22} |\n"
-msg += f"| {'-'*22} | {'-'*22} | {'-'*22} | {'-'*22} | {'-'*22} |\n"
+msg += f"| {'Test Name':^22} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^18} | {'%Δ':^18} |\n"
+msg += f"| {'-'*22} | {'-'*18} | {'-'*18} | {'-'*18} | {'-'*18} |\n"
 for i, name in enumerate(data_master.keys()):
     peak_pr = data_pr[name]["mem"].max()
     peak_ma = data_master[name]["mem"].max()
@@ -52,8 +52,8 @@ for i, name in enumerate(data_master.keys()):
     percent_change = (delta / peak_ma) * 100
     sign = "-" if delta >= 0 else "+"
     msg += (
-        f"{sign} {name:>22} | {peak_ma:^22.1f} | {peak_pr:^22.1f} |"
-        + f" {sign}{abs(delta):^22.1f} | {sign}{abs(percent_change):^22.2f}% |\n"
+        f"{sign} {name:>22} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
+        + f" {sign}{abs(delta):^18.1f} | {f'{sign}{abs(percent_change)}%':^18.2f} |\n"
     )
 msg += f"```"
 
@@ -63,10 +63,6 @@ with open("commit_msg.txt", "w") as fh:
 # ---------- add the image to the job summary ----------
 summary = os.getenv("GITHUB_STEP_SUMMARY")
 if summary:
-    with open(PNG, "rb") as fh:
-        b64 = base64.b64encode(fh.read()).decode()
     with open(summary, "a") as out:
         out.write("\n## Memory timeline\n\n")
-        out.write(
-            f'<img src="data:image/png;base64,{b64}" alt="memory plot" width="800"/>\n'
-        )
+        out.write(f"![Memory plot]({PNG})\n")
