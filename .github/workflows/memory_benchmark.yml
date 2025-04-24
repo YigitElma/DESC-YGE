@@ -133,7 +133,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           file-path: tests/benchmarks/commit_msg.txt
-          comment-tag: benchmark
+          comment-tag: memory-benchmark
 
       - name: Upload benchmark data
         if: always() && env.has_changes == 'true'

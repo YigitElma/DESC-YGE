@@ -100,8 +100,8 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
-        mems.append(np.array(mem) - min(mem))
-        ts.append(np.array(t) - t[0])
+        mems.append(list(np.array(mem) - min(mem)))
+        ts.append(list(np.array(t) - t[0]))
 
     branch = sys.argv[1]  # master or pr
     # plotting
