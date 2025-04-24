@@ -6,15 +6,19 @@ and embed the plot in the *job summary* (GITHUB_STEP_SUMMARY).
 """
 import base64, os, numpy as np, matplotlib.pyplot as plt
 
-mpr = np.loadtxt("pr_memory.txt.txt")
+print(os.getcwd())
+print("Files in the current directory:")
+for file in os.listdir("."):
+    print(file)
+mpr = np.loadtxt("pr_memory.txt")
 tpr = np.loadtxt("pr_time.txt")
-mma = np.loadtxt("master_memory.txt.txt")
+mma = np.loadtxt("master_memory.txt")
 tma = np.loadtxt("master_time.txt")
 
 # ---------- plot ----------
 plt.figure(figsize=(12, 6))
-plt.plot(tpr, mpr, label="PR", lw=1.5)
-plt.plot(tma, mma, label="master", lw=1.5)
+plt.plot(tpr, mpr, "r", label="PR", lw=3)
+plt.plot(tma, mma, "b", label="master", lw=1)
 plt.xlabel("Time [s]")
 plt.ylabel("Δ RSS [MB]")
 plt.title("Memory comparison (PR vs master)")
