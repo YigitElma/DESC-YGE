@@ -64,7 +64,7 @@ for i, name in enumerate(data_master.keys()):
         + f" {delta:^12} | {percent_change:^12} |\n"
     )
 msg += f"```"
-msg += f"\n\n[Memory plot]({image_url})\n"
+msg += f"\n\nFor the memory plots, go to the `Memory Benchmarks` workflow and download the artifact!\n"
 
 
 with open("commit_msg.txt", "w") as fh:
