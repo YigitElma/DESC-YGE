@@ -82,6 +82,7 @@ if __name__ == "__main__":
     ]
 
     for i in range(len(funs)):
+        print(f"Running {funs[i]}...")
         mem = []
         t = []
         gc.collect()
@@ -99,8 +100,9 @@ if __name__ == "__main__":
         # wait until the child exits, then join the sampler
         child.wait()
         sampler.join()
-        data[funs[i]]["mem"] = np.array(mem)
-        data[funs[i]]["t"] = np.array(t)
+        data[funs[i]] = {}
+        data[funs[i]]["mem"] = np.array(mem) - min(mem)
+        data[funs[i]]["t"] = np.array(t) - t[0]  # to start at 0
 
     branch = sys.argv[1]  # master or pr
     with open(f"{branch}.pickle", "wb") as f:

@@ -18,21 +18,25 @@ with open("pr.pickle", "rb") as f:
     data_pr = pickle.load(f)
 
 # ---------- plot ----------
-plt.figure(figsize=(12, 6))
-for i, name in enumerate(data_master.keys()):
-    plt.plot(data_pr[name]["t"], data_pr[name]["mem"], "r", label=f"{name} PR", lw=3)
-    plt.plot(
+num_tests = len(data_master.keys())
+fig, axes = plt.subplots(num_tests, 1, figsize=(12, 6 * num_tests), sharex=False)
+
+for i, (name, ax) in enumerate(zip(data_master.keys(), axes)):
+    ax.plot(data_pr[name]["t"], data_pr[name]["mem"], "r", label="PR", lw=3)
+    ax.plot(
         data_master[name]["t"],
         data_master[name]["mem"],
         "--b",
-        label=f"{name} Master",
+        label="Master",
         lw=1,
     )
-plt.xlabel("Time [s]")
-plt.ylabel("Δ RSS [MB]")
-plt.title("Memory comparison (PR vs master)")
-plt.grid(True)
-plt.legend()
+    ax.set_title(name)
+    ax.set_ylabel("Δ RSS [MB]")
+    max_time = max(data_master[name]["t"][-1], data_pr[name]["t"][-1]) + 0.5
+    ax.set_xlabel(f"Time [s]")
+    ax.set_xlim([0, max_time])
+    ax.grid(True)
+    ax.legend()
 plt.tight_layout()
 PNG = "compare.png"
 plt.savefig(PNG, dpi=100)
@@ -58,13 +62,13 @@ msg += f"```"
 with open("commit_msg.txt", "w") as fh:
     fh.write(msg)
 
-# ---------- add the image to the job summary ----------
-summary = os.getenv("GITHUB_STEP_SUMMARY")
-if summary:
-    with open(PNG, "rb") as fh:
-        b64 = base64.b64encode(fh.read()).decode()
-    with open(summary, "a") as out:
-        out.write("\n## Memory timeline\n\n")
-        out.write(
-            f'<img src="data:image/png;base64,{b64}" alt="memory plot" width="800"/>\n'
-        )
+# # ---------- add the image to the job summary ----------
+# summary = os.getenv("GITHUB_STEP_SUMMARY")
+# if summary:
+#     with open(PNG, "rb") as fh:
+#         b64 = base64.b64encode(fh.read()).decode()
+#     with open(summary, "a") as out:
+#         out.write("\n## Memory timeline\n\n")
+#         out.write(
+#             f'<img src="data:image/png;base64,{b64}" alt="memory plot" width="800"/>\n'
+#         )

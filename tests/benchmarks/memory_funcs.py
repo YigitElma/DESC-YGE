@@ -43,7 +43,7 @@ def test_proximal_freeb_compute(res):
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
     )
-    obj.build()
+    obj.build(verbose=0)
     x = obj.x(eq)
     obj.compute_scaled_error(x, obj.constants).block_until_ready()
 
@@ -62,7 +62,7 @@ def test_proximal_freeb_jac(res):
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
     )
-    obj.build()
+    obj.build(verbose=0)
     x = obj.x(eq)
     obj.jac_scaled_error(x, prox.constants).block_until_ready()
 
