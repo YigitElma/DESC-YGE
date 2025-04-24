@@ -26,7 +26,7 @@ plt.grid(True)
 plt.legend()
 plt.tight_layout()
 PNG = "compare.png"
-plt.savefig(PNG, dpi=150)
+plt.savefig(PNG, dpi=100)
 
 # ---------- numbers ----------
 peak_pr = float(mpr.max())
