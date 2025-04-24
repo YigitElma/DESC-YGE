@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
-
-sys.path.insert(0, os.path.abspath("."))
-sys.path.append(os.path.abspath("../../"))
-
-import desc
+import warnings
 
 if sys.argv[3] in ["GPU", "gpu"]:
     # Set the environment variable to use the GPU
@@ -13,7 +9,7 @@ if sys.argv[3] in ["GPU", "gpu"]:
     from desc import set_device
 
     set_device("gpu")
-import warnings
+
 
 from desc.backend import jax
 import desc.examples
