@@ -1,8 +1,0 @@
-### Memory benchmark result
-
-```diff
-|       Test Name        |    Master (MB)     |      PR (MB)       |    Δ (MB)    |      %Δ      |
-| ---------------------- | ------------------ | ------------------ | ------------ | ------------ |
-- proximal_freeb_compute |       1357.1       |       1357.1       |     -0.0     |    -0.0 %    |
-- proximal_freeb_jac     |       8490.0       |       8490.0       |     -0.0     |    -0.0 %    |
-```

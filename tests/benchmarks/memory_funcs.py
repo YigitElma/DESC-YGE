@@ -45,7 +45,8 @@ def test_proximal_freeb_compute(res):
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    obj.compute_scaled_error(x, obj.constants).block_until_ready()
+    for _ in range(3):
+        obj.compute_scaled_error(x, obj.constants).block_until_ready()
 
 
 def test_proximal_freeb_jac(res):
@@ -64,7 +65,8 @@ def test_proximal_freeb_jac(res):
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    obj.jac_scaled_error(x, prox.constants).block_until_ready()
+    for _ in range(3):
+        obj.jac_scaled_error(x, prox.constants).block_until_ready()
 
 
 if __name__ == "__main__":
