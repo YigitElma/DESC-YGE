@@ -78,6 +78,7 @@ if __name__ == "__main__":
     res = int(sys.argv[2])
 
     print("[DEBUG] Using desc from:", desc.__file__)
+    print("[DEBUG] This should only print on latest commit")
 
     if func == "proximal_freeb_compute":
         test_proximal_freeb_compute(res)
