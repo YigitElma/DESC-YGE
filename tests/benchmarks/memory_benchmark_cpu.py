@@ -84,7 +84,6 @@ if __name__ == "__main__":
     ]
 
     for i in range(len(funs)):
-        print(f"Running {funs[i]}...")
         mem = []
         t = []
         gc.collect()

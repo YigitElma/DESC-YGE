@@ -47,8 +47,8 @@ image_url = f"https://github.com/{repo}/actions/runs/{run_id}/artifacts"
 
 # ---------- commit message ----------
 msg = f"### Memory benchmark result\n\n```diff\n"
-msg += f"| {'Test Name':^22} | {'%Δ':^12} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^12} |\n"
-msg += f"| {'-'*22} | {'-'*12} | {'-'*18} | {'-'*18} | {'-'*12} |\n"
+msg += f"| {'Test Name':^38} | {'%Δ':^12} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^12} |\n"
+msg += f"| {'-'*38} | {'-'*12} | {'-'*18} | {'-'*18} | {'-'*12} |\n"
 for i, name in enumerate(data_master.keys()):
     peak_pr = data_pr[name]["mem"].max()
     peak_ma = data_master[name]["mem"].max()
@@ -59,7 +59,7 @@ for i, name in enumerate(data_master.keys()):
     percent_change = sign + f"{abs((delta / peak_ma) * 100):.2f}" + " %"
     delta = sign + f"{abs(delta):.2f}"
     msg += (
-        f"{color} {name:<22} | {percent_change:^12} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
+        f"{color} {name:<38} | {percent_change:^12} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
         + f" {delta:^12} |\n"
     )
 msg += f"```"

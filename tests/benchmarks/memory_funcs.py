@@ -48,8 +48,7 @@ def test_objective_jac_atf():
             maybe_add_self_consistency(eq, get_fixed_boundary_constraints(eq)),
         ),
     )
-    objective.build(eq)
-    objective.compile()
+    objective.build(verbose=0)
     x = objective.x(eq)
 
     for _ in range(3):
@@ -78,7 +77,7 @@ def test_perturb_2():
         "deltas": deltas,
         "tr_ratio": tr_ratio,
         "order": 2,
-        "verbose": 2,
+        "verbose": 0,
         "copy": True,
     }
     for _ in range(3):
@@ -100,10 +99,10 @@ def test_proximal_jac_atf_with_eq_update():
         objective,
         constraint,
         eq,
-        perturb_options={"verbose": 3},
-        solve_options={"verbose": 3, "maxiter": 0},
+        perturb_options={"verbose": 0},
+        solve_options={"verbose": 0, "maxiter": 0},
     )
-    prox.build(verbose=3)
+    prox.build(verbose=0)
     x = prox.x(eq)
     for _ in range(3):
         # we change x slightly to profile solve/perturb equilibrium too
@@ -165,15 +164,16 @@ def _test_objective_ripple(spline, method):
     )
     constraint = ObjectiveFunction([ForceBalance(eq)])
     prox = ProximalProjection(objective, constraint, eq)
-    prox.build(eq)
+    prox.build(verbose=0)
     x = prox.x(eq)
-    for _ in range(2):
+    for _ in range(3):
         _ = getattr(prox, method)(x, prox.constants).block_until_ready()
         gc.collect()
 
 
 if __name__ == "__main__":
     func = str(sys.argv[1])
+    print(f"Running {func}...")
 
     # I know this is not the best way to do this, but just easy for now
     if func == "test_objective_jac_atf":
