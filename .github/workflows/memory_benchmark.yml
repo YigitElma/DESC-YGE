@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: compare-plot
-          path: tests/benchmarks/compare.png
+          path: tests/benchmarks/compare2.png
 
       - name: Comment PR with the results
         if: env.has_changes == 'true'

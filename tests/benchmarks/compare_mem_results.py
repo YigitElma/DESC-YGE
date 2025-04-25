@@ -33,14 +33,14 @@ for i, (name, ax) in enumerate(zip(data_master.keys(), axes)):
         lw=1,
     )
     ax.set_title(name)
-    ax.set_ylabel("Δ RSS [MB]")
+    ax.set_ylabel("Memory Usage [MB]")
     max_time = max(data_master[name]["t"][-1], data_pr[name]["t"][-1]) + 0.5
     ax.set_xlabel(f"Time [s]")
     ax.set_xlim([0, max_time])
     ax.grid(True)
     ax.legend()
 plt.tight_layout()
-PNG = "compare.png"
+PNG = "compare2.png"
 plt.savefig(PNG, dpi=100)
 
 # environment variable passed from workflow
