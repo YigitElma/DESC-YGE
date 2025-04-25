@@ -111,5 +111,5 @@ if __name__ == "__main__":
     branch = sys.argv[1]  # master or pr
     print("[DEBUG] Saving pickle of branch:", branch)
     print(data.keys())
-    with open(f"{branch}.pickle", "wb") as f:
+    with open(f"{branch}2.pickle", "wb") as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
