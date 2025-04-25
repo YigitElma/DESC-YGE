@@ -79,7 +79,7 @@ if __name__ == "__main__":
         "test_proximal_jac_atf_with_eq_update",
         "test_perturb_2",
         "test_proximal_freeb_jac",
-        "test_objective_jac_ripple":
+        "test_objective_jac_ripple",
         "test_objective_jac_ripple_spline",
     ]
 
