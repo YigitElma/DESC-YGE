@@ -8,7 +8,6 @@ import psutil
 import gc
 import sys
 import numpy as np
-import os
 
 def monitor_ram(proc, interval, ram_usage, timestamps):
     """Sample system RAM until *proc* finishes."""
@@ -81,9 +80,6 @@ if __name__ == "__main__":
         "proximal_freeb_jac",
     ]
 
-    # with open("memory_funcs.py", "r") as f:
-    #     print(f.read())
-
     for i in range(len(funs)):
         print(f"Running {funs[i]}...")
         mem = []
@@ -106,10 +102,7 @@ if __name__ == "__main__":
         data[funs[i]] = {}
         data[funs[i]]["mem"] = np.array(mem) - min(mem)
         data[funs[i]]["t"] = np.array(t) - t[0]  # to start at 0
-        print(data[funs[i]]["t"][-1], "seconds")
 
     branch = sys.argv[1]  # master or pr
-    print("[DEBUG] Saving pickle of branch:", branch)
-    print(data.keys())
     with open(f"{branch}2.pickle", "wb") as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

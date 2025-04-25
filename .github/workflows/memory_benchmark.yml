@@ -39,7 +39,9 @@ jobs:
           filters: |
             has_changes:
               - 'desc/**'
-              - 'tests/benchmarks/**'
+              - 'tests/benchmarks/memory_benchmark_cpu.py'
+              - 'tests/benchmarks/compare_mem_results.py'
+              - 'tests/benchmarks/memory_funcs.py'
               - 'setup.cfg'
               - '.github/workflows/memory_benchmark.yml'
 

@@ -9,11 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
-print(os.getcwd())
-print("Files in the current directory:")
-for file in os.listdir("."):
-    print(file)
-
 with open("master2.pickle", "rb") as f:
     data_master = pickle.load(f)
 with open("pr2.pickle", "rb") as f:
@@ -66,7 +61,7 @@ for i, name in enumerate(data_master.keys()):
         + f" {delta:^12} | {percent_change:^12} |\n"
     )
 msg += f"```"
-msg += f"\n\nFor the memory plots, go to the `Memory Benchmarks` workflow and download the artifact!\n"
+msg += f"\n\nFor the memory plots, go to the summary of `Memory Benchmarks` workflow and download the artifact!\n"
 
 
 with open("commit_msg.txt", "w") as fh:

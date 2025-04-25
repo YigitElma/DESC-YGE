@@ -2,6 +2,7 @@
 import sys
 import os
 import warnings
+import gc
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.append(os.path.abspath("../../"))
@@ -47,6 +48,7 @@ def test_proximal_freeb_compute(res):
     x = obj.x(eq)
     for _ in range(30):
         obj.compute_scaled_error(x, obj.constants).block_until_ready()
+        gc.collect()
 
 
 def test_proximal_freeb_jac(res):
@@ -69,16 +71,14 @@ def test_proximal_freeb_jac(res):
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    for _ in range(2):
+    for _ in range(5):
         obj.jac_scaled_error(x, prox.constants).block_until_ready()
+        gc.collect()
 
 
 if __name__ == "__main__":
     func = str(sys.argv[1])
     res = int(sys.argv[2])
-
-    print("[DEBUG] Using desc from:", desc.__file__)
-    print("[DEBUG] This should only print on latest commit")
 
     if func == "proximal_freeb_compute":
         test_proximal_freeb_compute(res)
