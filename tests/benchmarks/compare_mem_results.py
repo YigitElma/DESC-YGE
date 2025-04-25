@@ -4,7 +4,9 @@ Read both result folders, plot PR vs master into compare.png,
 write a Markdown summary to commit_msg.txt,
 and embed the plot in the *job summary* (GITHUB_STEP_SUMMARY).
 """
-import base64, os, numpy as np, matplotlib.pyplot as plt
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 
 print(os.getcwd())
@@ -12,9 +14,9 @@ print("Files in the current directory:")
 for file in os.listdir("."):
     print(file)
 
-with open("master.pickle", "rb") as f:
+with open(".mem_results/master.pickle", "rb") as f:
     data_master = pickle.load(f)
-with open("pr.pickle", "rb") as f:
+with open(".mem_results/pr.pickle", "rb") as f:
     data_pr = pickle.load(f)
 
 # ---------- plot ----------

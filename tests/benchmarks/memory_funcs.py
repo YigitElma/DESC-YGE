@@ -3,8 +3,8 @@ import sys
 import os
 import warnings
 
-sys.path.insert(0, os.path.abspath("."))
-sys.path.append(os.path.abspath("../../"))
+# sys.path.insert(0, os.path.abspath("."))
+# sys.path.append(os.path.abspath("../../"))
 
 import desc
 
@@ -69,7 +69,7 @@ def test_proximal_freeb_jac(res):
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    for _ in range(5):
+    for _ in range(2):
         obj.jac_scaled_error(x, prox.constants).block_until_ready()
 
 
