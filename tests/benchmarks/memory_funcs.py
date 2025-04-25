@@ -3,13 +3,17 @@ import sys
 import os
 import warnings
 
+sys.path.insert(0, os.path.abspath("."))
+sys.path.append(os.path.abspath("../../"))
+
+import desc
+
 if sys.argv[3] in ["GPU", "gpu"]:
     # Set the environment variable to use the GPU
     os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
     from desc import set_device
 
     set_device("gpu")
-
 
 from desc.backend import jax
 import desc.examples
