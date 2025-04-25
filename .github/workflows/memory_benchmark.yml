@@ -110,6 +110,7 @@ jobs:
         if: env.has_changes == 'true'
         run: |
           source .venv-${{ env.version }}/bin/activate
+          pip install -e .
           cd tests/benchmarks
           python memory_benchmark_cpu.py master
 
