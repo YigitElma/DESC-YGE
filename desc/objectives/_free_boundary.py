@@ -447,8 +447,8 @@ class BoundaryError(_Objective):
         name="Boundary error",
         jac_chunk_size=1,
         *,
-        bs_chunk_size=None,
-        B_plasma_chunk_size=None,
+        bs_chunk_size=1,
+        B_plasma_chunk_size=1,
         **kwargs,
     ):
         if target is None and bounds is None:
