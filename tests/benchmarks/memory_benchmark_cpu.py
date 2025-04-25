@@ -81,6 +81,9 @@ if __name__ == "__main__":
         "proximal_freeb_jac",
     ]
 
+    with open("memory_funcs.py", "r") as f:
+        print(f.read())
+
     for i in range(len(funs)):
         print(f"Running {funs[i]}...")
         mem = []
