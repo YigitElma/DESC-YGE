@@ -12,10 +12,6 @@ on:
         required: false
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   benchmark:
     runs-on: ubuntu-latest
@@ -43,7 +39,9 @@ jobs:
           filters: |
             has_changes:
               - 'desc/**'
-              - 'tests/benchmarks/**'
+              - 'tests/benchmarks/memory_benchmark_cpu.py'
+              - 'tests/benchmarks/compare_mem_results.py'
+              - 'tests/benchmarks/memory_funcs.py'
               - 'setup.cfg'
               - '.github/workflows/memory_benchmark.yml'
 
@@ -130,7 +128,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: compare-plot
-          path: tests/benchmarks/compare.png
+          path: tests/benchmarks/compare2.png
 
       - name: Comment PR with the results
         if: env.has_changes == 'true'
@@ -140,11 +138,3 @@ jobs:
         with:
           file-path: tests/benchmarks/commit_msg.txt
           comment-tag: memory-benchmark
-
-      - name: Upload benchmark data
-        if: always() && env.has_changes == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark_artifact
-          path: tests/benchmarks/.memory_benchmarks
-          include-hidden-files: true

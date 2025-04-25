@@ -4,17 +4,14 @@ Read both result folders, plot PR vs master into compare.png,
 write a Markdown summary to commit_msg.txt,
 and embed the plot in the *job summary* (GITHUB_STEP_SUMMARY).
 """
-import base64, os, numpy as np, matplotlib.pyplot as plt
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 
-print(os.getcwd())
-print("Files in the current directory:")
-for file in os.listdir("."):
-    print(file)
-
-with open("master.pickle", "rb") as f:
+with open("master2.pickle", "rb") as f:
     data_master = pickle.load(f)
-with open("pr.pickle", "rb") as f:
+with open("pr2.pickle", "rb") as f:
     data_pr = pickle.load(f)
 
 # ---------- plot ----------
@@ -31,14 +28,14 @@ for i, (name, ax) in enumerate(zip(data_master.keys(), axes)):
         lw=1,
     )
     ax.set_title(name)
-    ax.set_ylabel("Δ RSS [MB]")
+    ax.set_ylabel("Memory Usage [MB]")
     max_time = max(data_master[name]["t"][-1], data_pr[name]["t"][-1]) + 0.5
     ax.set_xlabel(f"Time [s]")
     ax.set_xlim([0, max_time])
     ax.grid(True)
     ax.legend()
 plt.tight_layout()
-PNG = "compare.png"
+PNG = "compare2.png"
 plt.savefig(PNG, dpi=100)
 
 # environment variable passed from workflow
@@ -64,7 +61,7 @@ for i, name in enumerate(data_master.keys()):
         + f" {delta:^12} | {percent_change:^12} |\n"
     )
 msg += f"```"
-msg += f"\n\n[Memory plot]({image_url})\n"
+msg += f"\n\nFor the memory plots, go to the summary of `Memory Benchmarks` workflow and download the artifact!\n"
 
 
 with open("commit_msg.txt", "w") as fh:

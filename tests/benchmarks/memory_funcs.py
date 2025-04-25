@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import os
+import warnings
+import gc
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.append(os.path.abspath("../../"))
@@ -13,7 +15,6 @@ if sys.argv[3] in ["GPU", "gpu"]:
     from desc import set_device
 
     set_device("gpu")
-import warnings
 
 from desc.backend import jax
 import desc.examples
@@ -38,14 +39,16 @@ def test_proximal_freeb_compute(res):
         eq.change_resolution(res, res, res, 2 * res, 2 * res, 2 * res)
     field = ToroidalMagneticField(1.0, 1.0)  # just a dummy field for benchmarking
     objective = ObjectiveFunction(BoundaryError(eq, field=field))
-    constraint = ObjectiveFunction(ForceBalance(eq, jac_chunk_size=1))
+    constraint = ObjectiveFunction(ForceBalance(eq))
     prox = ProximalProjection(objective, constraint, eq)
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    obj.compute_scaled_error(x, obj.constants).block_until_ready()
+    for _ in range(30):
+        obj.compute_scaled_error(x, obj.constants).block_until_ready()
+        gc.collect()
 
 
 def test_proximal_freeb_jac(res):
@@ -56,20 +59,27 @@ def test_proximal_freeb_jac(res):
         warnings.simplefilter("ignore")
         eq.change_resolution(res, res, res, 2 * res, 2 * res, 2 * res)
     field = ToroidalMagneticField(1.0, 1.0)  # just a dummy field for benchmarking
-    objective = ObjectiveFunction(BoundaryError(eq, field=field))
-    constraint = ObjectiveFunction(ForceBalance(eq, jac_chunk_size=1))
+    objective = ObjectiveFunction(
+        BoundaryError(eq, field=field), jac_chunk_size=1, deriv_mode="batched"
+    )
+    constraint = ObjectiveFunction(
+        ForceBalance(eq), jac_chunk_size=1, deriv_mode="batched"
+    )
     prox = ProximalProjection(objective, constraint, eq)
     obj = LinearConstraintProjection(
         prox, ObjectiveFunction((FixCurrent(eq), FixPressure(eq), FixPsi(eq)))
     )
     obj.build(verbose=0)
     x = obj.x(eq)
-    obj.jac_scaled_error(x, prox.constants).block_until_ready()
+    for _ in range(5):
+        obj.jac_scaled_error(x, prox.constants).block_until_ready()
+        gc.collect()
 
 
 if __name__ == "__main__":
     func = str(sys.argv[1])
     res = int(sys.argv[2])
+
     if func == "proximal_freeb_compute":
         test_proximal_freeb_compute(res)
     elif func == "proximal_freeb_jac":

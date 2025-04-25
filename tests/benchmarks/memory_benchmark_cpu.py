@@ -9,7 +9,6 @@ import gc
 import sys
 import numpy as np
 
-
 def monitor_ram(proc, interval, ram_usage, timestamps):
     """Sample system RAM until *proc* finishes."""
     while proc.poll() is None:  # child still running?
@@ -105,5 +104,5 @@ if __name__ == "__main__":
         data[funs[i]]["t"] = np.array(t) - t[0]  # to start at 0
 
     branch = sys.argv[1]  # master or pr
-    with open(f"{branch}.pickle", "wb") as f:
+    with open(f"{branch}2.pickle", "wb") as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
