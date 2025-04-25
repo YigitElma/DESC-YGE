@@ -71,13 +71,16 @@ def monitor_vram(proc, interval, vram_usage, timestamps):
 if __name__ == "__main__":
     mode = "CPU"  # "CPU" or "GPU"
     interval = 0.1  # seconds between samples
-    res = 7
 
     data = {}
 
     funs = [
-        "proximal_freeb_compute",
-        "proximal_freeb_jac",
+        "test_objective_jac_atf",
+        "test_proximal_jac_atf_with_eq_update",
+        "test_perturb_2",
+        "test_proximal_freeb_jac",
+        "test_objective_jac_ripple":
+        "test_objective_jac_ripple_spline",
     ]
 
     for i in range(len(funs)):
@@ -87,7 +90,7 @@ if __name__ == "__main__":
         gc.collect()
         # start the sampler thread
         # launch the script to be profiled
-        child = subprocess.Popen(["python", "memory_funcs.py", funs[i], f"{res}", mode])
+        child = subprocess.Popen(["python", "memory_funcs.py", funs[i], mode])
         target = monitor_vram if mode == "GPU" else monitor_ram
         sampler = threading.Thread(
             target=target,

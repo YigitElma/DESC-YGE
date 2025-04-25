@@ -47,18 +47,20 @@ image_url = f"https://github.com/{repo}/actions/runs/{run_id}/artifacts"
 
 # ---------- commit message ----------
 msg = f"### Memory benchmark result\n\n```diff\n"
-msg += f"| {'Test Name':^22} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^12} | {'%Δ':^12} |\n"
-msg += f"| {'-'*22} | {'-'*18} | {'-'*18} | {'-'*12} | {'-'*12} |\n"
+msg += f"| {'Test Name':^22} | {'%Δ':^12} | {'Master (MB)':^18} | {'PR (MB)':^18} | {'Δ (MB)':^12} |\n"
+msg += f"| {'-'*22} | {'-'*12} | {'-'*18} | {'-'*18} | {'-'*12} |\n"
 for i, name in enumerate(data_master.keys()):
     peak_pr = data_pr[name]["mem"].max()
     peak_ma = data_master[name]["mem"].max()
     delta = peak_pr - peak_ma
-    sign = "-" if delta >= 0 else "+"
+    sign = "+" if delta >= 0 else "-"
+    # only show color if the delta is significant
+    color = " " if abs((delta / peak_ma) * 100) < 7 else "-" if delta >= 0 else "+"
     percent_change = sign + f"{abs((delta / peak_ma) * 100):.2f}" + " %"
     delta = sign + f"{abs(delta):.2f}"
     msg += (
-        f"{sign} {name:<22} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
-        + f" {delta:^12} | {percent_change:^12} |\n"
+        f"{color} {name:<22} | {percent_change:^12} | {peak_ma:^18.1f} | {peak_pr:^18.1f} |"
+        + f" {delta:^12} |\n"
     )
 msg += f"```"
 msg += f"\n\nFor the memory plots, go to the summary of `Memory Benchmarks` workflow and download the artifact!\n"
