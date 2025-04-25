@@ -445,7 +445,7 @@ class BoundaryError(_Objective):
         field_grid=None,
         field_fixed=False,
         name="Boundary error",
-        jac_chunk_size=None,
+        jac_chunk_size=100,
         *,
         bs_chunk_size=None,
         B_plasma_chunk_size=None,
