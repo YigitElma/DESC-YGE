@@ -3,8 +3,8 @@ import sys
 import os
 import warnings
 
-# sys.path.insert(0, os.path.abspath("."))
-# sys.path.append(os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("."))
+sys.path.append(os.path.abspath("../../"))
 
 import desc
 
@@ -76,6 +76,9 @@ def test_proximal_freeb_jac(res):
 if __name__ == "__main__":
     func = str(sys.argv[1])
     res = int(sys.argv[2])
+
+    print("[DEBUG] Using desc from:", desc.__file__)
+
     if func == "proximal_freeb_compute":
         test_proximal_freeb_compute(res)
     elif func == "proximal_freeb_jac":

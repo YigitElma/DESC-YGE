@@ -105,6 +105,5 @@ if __name__ == "__main__":
         data[funs[i]]["t"] = np.array(t) - t[0]  # to start at 0
 
     branch = sys.argv[1]  # master or pr
-    os.mkdir(".mem_results")
-    with open(f".mem_results/{branch}.pickle", "wb") as f:
+    with open(f"{branch}.pickle", "wb") as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

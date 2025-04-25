@@ -14,9 +14,9 @@ print("Files in the current directory:")
 for file in os.listdir("."):
     print(file)
 
-with open(".mem_results/master.pickle", "rb") as f:
+with open("master.pickle", "rb") as f:
     data_master = pickle.load(f)
-with open(".mem_results/pr.pickle", "rb") as f:
+with open("pr.pickle", "rb") as f:
     data_pr = pickle.load(f)
 
 # ---------- plot ----------
