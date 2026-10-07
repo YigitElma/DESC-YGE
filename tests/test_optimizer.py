@@ -76,6 +76,8 @@ from desc.optimize.optimizer import _parse_x_scale
 from desc.optimize.utils import chol, gershgorin_bounds
 from desc.utils import get_all_instances
 
+from .utils import EPS
+
 
 @jit
 def vector_fun(x, p):
@@ -149,8 +151,8 @@ def test_chol_positive_definite_path_unchanged():
     np.testing.assert_allclose(
         chol(jnp.asarray(matrix)),
         np.linalg.cholesky(matrix),
-        rtol=1e-14,
-        atol=1e-14,
+        rtol=10 * EPS,
+        atol=10 * EPS,
     )
 
 
@@ -422,7 +424,7 @@ class TestLSQTR:
                 "tr_method": "cho",
             },
         )
-        np.testing.assert_allclose(out["x"], p)
+        np.testing.assert_allclose(out["x"], p, rtol=1e-7 + 100 * EPS)
 
         out = lsqtr(
             res,
@@ -436,7 +438,7 @@ class TestLSQTR:
                 "tr_method": "svd",
             },
         )
-        np.testing.assert_allclose(out["x"], p)
+        np.testing.assert_allclose(out["x"], p, rtol=1e-7 + 100 * EPS)
 
 
 @pytest.mark.unit
@@ -1366,11 +1368,14 @@ def test_proximal_jacobian():
     # this is basically the old method we're benchmarking against
     xf = con1.x(eq1)
     xg = obj1.x(eq1)
+    eq_unfixed_idx = prox1._eq_solve_objective._unfixed_idx
+    # nullspace of A @ D, ie the feasible tangents with the D scaling divided out
+    eq_Z = (1 / prox1._eq_solve_objective._D)[eq_unfixed_idx, None] * (
+        prox1._eq_solve_objective._feasible_tangents[eq_unfixed_idx]
+    )
     # for scaled jacobian
     Fx = con1.jac_scaled(xf)
     Gx = obj1.jac_scaled(xg)
-    eq_unfixed_idx = prox1._eq_solve_objective._unfixed_idx
-    eq_Z = prox1._eq_solve_objective._Z
     Fxh = Fx[:, eq_unfixed_idx] @ eq_Z
     Gxh = Gx[:, eq_unfixed_idx] @ eq_Z
     Fc = Fx @ prox1._dxdc
@@ -1500,9 +1505,9 @@ def test_proximal_grad():
     vjp3 = f3.T @ J3
 
     # check that both methods agree
-    np.testing.assert_allclose(g1, vjp1, rtol=1e-12, atol=1e-12)
-    np.testing.assert_allclose(g2, vjp2, rtol=1e-12, atol=1e-12)
-    np.testing.assert_allclose(g3, vjp3, rtol=1e-12, atol=1e-12)
+    np.testing.assert_allclose(g1, vjp1, rtol=1e3 * EPS, atol=1e3 * EPS)
+    np.testing.assert_allclose(g2, vjp2, rtol=1e3 * EPS, atol=1e3 * EPS)
+    np.testing.assert_allclose(g3, vjp3, rtol=1e3 * EPS, atol=1e3 * EPS)
 
 
 @pytest.mark.slow
@@ -1544,8 +1549,10 @@ def test_LinearConstraint_jacobian():
 
     x = obj1.x()
     x_reduced = lc1.x()
-    jac_scaled = obj1.jac_scaled(x)[:, lc1._unfixed_idx] @ lc1._Z
-    jac_unscaled = obj1.jac_unscaled(x)[:, lc1._unfixed_idx] @ lc1._Z
+    # nullspace of A @ D, ie the feasible tangents with the D scaling divided out
+    Z1 = (1 / lc1._D)[lc1._unfixed_idx, None] * lc1._feasible_tangents[lc1._unfixed_idx]
+    jac_scaled = obj1.jac_scaled(x)[:, lc1._unfixed_idx] @ Z1
+    jac_unscaled = obj1.jac_unscaled(x)[:, lc1._unfixed_idx] @ Z1
     jvp_scaled = jac_scaled @ vl
     jvp_unscaled = jac_unscaled @ vl
     vjp_scaled = jac_scaled.T @ vr
