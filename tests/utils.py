@@ -4,13 +4,20 @@ import os
 import warnings
 
 import numpy as np
+from shapely import make_valid
 from shapely.geometry import Polygon
 
-from desc.backend import put
+from desc.backend import jnp, put
 from desc.derivatives import _Derivative
 from desc.grid import Grid, LinearGrid
 from desc.utils import ensure_tuple
 from desc.vmec import VMECIO
+
+# machine precision of the floats desc computes with, ie float32 unless x64 is enabled
+EPS = np.finfo(jnp.zeros(0).dtype).eps
+# numpy's default rtol and an atol for exact zeros, but not below the rounding error
+RTOL = max(1e-7, 100 * EPS)
+ATOL = 100 * EPS
 
 
 def compute_coords(equil, Nr=10, Nt=8, Nz=None):
@@ -90,15 +97,22 @@ def area_difference(Rr1, Rr2, Zr1, Zr2, Rv1, Rv2, Zv1, Zv2):
     assert Rr1.shape == Rr2.shape == Zr1.shape == Zr2.shape
     assert Rv1.shape == Rv2.shape == Zv1.shape == Zv2.shape
 
+    # rounding errors in single precision can make the contours self-intersect
     poly_r1 = np.array(
         [
-            [Polygon(np.array([R, Z]).T) for R, Z in zip(Rr1[:, :, i], Zr1[:, :, i])]
+            [
+                make_valid(Polygon(np.array([R, Z]).T))
+                for R, Z in zip(Rr1[:, :, i], Zr1[:, :, i])
+            ]
             for i in range(Rr1.shape[2])
         ]
     )
     poly_r2 = np.array(
         [
-            [Polygon(np.array([R, Z]).T) for R, Z in zip(Rr2[:, :, i], Zr2[:, :, i])]
+            [
+                make_valid(Polygon(np.array([R, Z]).T))
+                for R, Z in zip(Rr2[:, :, i], Zr2[:, :, i])
+            ]
             for i in range(Rr2.shape[2])
         ]
     )
@@ -241,14 +255,18 @@ class FiniteDiffDerivative(_Derivative):
         Default = ``'fwd'``
     rel_step : float, optional
         Relative step size: dx = max(1, abs(x))*rel_step
-        Default = 1e-3
+        Default balances truncation and rounding error, 1e-3 in double precision.
 
     """
 
-    def __init__(self, fun, argnum=0, mode="fwd", rel_step=1e-3, **kwargs):
+    def __init__(self, fun, argnum=0, mode="fwd", rel_step=None, **kwargs):
 
         self._fun = fun
         self._argnum = argnum
+        # balance truncation and rounding error of a central difference
+        order = 2 if mode == "hess" else 1
+        if rel_step is None:
+            rel_step = max(1e-3, EPS ** (1 / (order + 2)))
         self.rel_step = rel_step
         self._set_mode(mode)
 
@@ -364,7 +382,7 @@ class FiniteDiffDerivative(_Derivative):
 
         """
         assert np.isscalar(argnum), "vjp for multiple args not currently supported"
-        rel_step = kwargs.pop("rel_step", 1e-3)
+        rel_step = kwargs.pop("rel_step", None)
 
         def _fun(*args):
             return v.T @ fun(*args, **kwargs)
@@ -394,7 +412,7 @@ class FiniteDiffDerivative(_Derivative):
             Jacobian times vectors v, summed over different argnums
 
         """
-        rel_step = kwargs.pop("rel_step", 1e-3)
+        rel_step = kwargs.pop("rel_step", max(1e-3, EPS ** (1 / 3)))
 
         if np.isscalar(argnum):
             nargs = 1
@@ -450,6 +468,7 @@ class FiniteDiffDerivative(_Derivative):
             argnum2 = tuple([i + 1 for i in argnum2])
             v2 = tuple(v2)
 
+        kwargs.setdefault("rel_step", max(1e-3, EPS ** (1 / 4)))
         dfdx = lambda dx1, *args: cls.compute_jvp(fun, argnum1, dx1, *args, **kwargs)
         d2fdx2 = lambda dx1, dx2: cls.compute_jvp(
             dfdx, argnum2, dx2, dx1, *args, **kwargs
@@ -500,6 +519,7 @@ class FiniteDiffDerivative(_Derivative):
             argnum3 = tuple([i + 2 for i in argnum3])
             v3 = tuple(v3)
 
+        kwargs.setdefault("rel_step", max(1e-3, EPS ** (1 / 5)))
         dfdx = lambda dx1, *args: cls.compute_jvp(fun, argnum1, dx1, *args, **kwargs)
         d2fdx2 = lambda dx1, dx2, *args: cls.compute_jvp(
             dfdx, argnum2, dx2, dx1, *args, **kwargs
@@ -517,7 +537,7 @@ class FiniteDiffDerivative(_Derivative):
     @classmethod
     def _compute_jvp_1arg(cls, fun, argnum, v, *args, **kwargs):
         """Compute a jvp wrt a single argument."""
-        rel_step = kwargs.pop("rel_step", 1e-3)
+        rel_step = kwargs.pop("rel_step", max(1e-3, EPS ** (1 / 3)))
         normv = np.linalg.norm(v)
         if normv != 0:
             vh = v / normv

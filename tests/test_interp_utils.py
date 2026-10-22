@@ -14,6 +14,8 @@ from desc.examples import get
 from desc.integrals import Bounce2D
 from desc.integrals._interp_utils import nufft1d2r, nufft2d2r, poly_val, polyroot_vec
 
+from .utils import ATOL, EPS, RTOL
+
 
 def _c_1d(x):
     """Test function for 1D FFT."""
@@ -99,7 +101,11 @@ class TestFastInterp:
 
         f = 2 * rfft(c, norm="forward")
         f = f.at[..., (0, -1) if (n % 2 == 0) else 0].divide(2)
-        np.testing.assert_allclose(nufft1d2r(xq, f, domain), func(xq))
+        # nufft accuracy, or the machine precision if that is worse
+        rtol = 1e-7 + 1e3 * EPS
+        np.testing.assert_allclose(
+            nufft1d2r(xq, f, domain), func(xq), rtol=rtol, atol=ATOL
+        )
 
         @grad
         def g(xq):
@@ -109,7 +115,7 @@ class TestFastInterp:
         def true_g(xq):
             return func(xq).sum()
 
-        np.testing.assert_allclose(g(xq), true_g(xq))
+        np.testing.assert_allclose(g(xq), true_g(xq), rtol=rtol, atol=ATOL)
 
     @pytest.mark.unit
     @pytest.mark.parametrize("func, m, n, domain_x, domain_y", _test_inputs_2D)
@@ -129,10 +135,16 @@ class TestFastInterp:
 
         v = func(xq, yq)
         np.testing.assert_allclose(
-            nufft2d2r(xq, yq, f1, domain_x, domain_y), v, rtol=1e-6
+            nufft2d2r(xq, yq, f1, domain_x, domain_y),
+            v,
+            rtol=1e-6 + 1e3 * EPS,
+            atol=ATOL,
         )
         np.testing.assert_allclose(
-            nufft2d2r(xq, yq, f2, domain_x, domain_y, None), v, rtol=1e-6
+            nufft2d2r(xq, yq, f2, domain_x, domain_y, None),
+            v,
+            rtol=1e-6 + 1e3 * EPS,
+            atol=ATOL,
         )
 
         @partial(grad, argnums=(0, 1))
@@ -148,8 +160,8 @@ class TestFastInterp:
             return func(xq, yq).sum()
 
         g = true_g(xq, yq)
-        np.testing.assert_allclose(g1(xq, yq), g, atol=1e-10)
-        np.testing.assert_allclose(g2(xq, yq), g, atol=1e-10)
+        np.testing.assert_allclose(g1(xq, yq), g, atol=max(1e-10, 100 * EPS), rtol=RTOL)
+        np.testing.assert_allclose(g2(xq, yq), g, atol=max(1e-10, 100 * EPS), rtol=RTOL)
 
     @pytest.mark.unit
     def test_nufft2_vec(self):
@@ -167,6 +179,8 @@ class TestFastInterp:
         np.testing.assert_allclose(
             nufft1d2r(xq, f, domain),
             np.stack([func_2(xq), func_2(xq)]),
+            rtol=RTOL,
+            atol=ATOL,
         )
 
         # batch with shape (1, 4)
@@ -181,6 +195,8 @@ class TestFastInterp:
                 partial(nufft1d2r, domain=domain, vec=False),
                 signature="(x),(b,f)->(b,x)",
             )(xq, f),
+            rtol=RTOL,
+            atol=ATOL,
         )
 
 
@@ -311,6 +327,8 @@ class TestPolyUtils:
                     root,
                     unique_root,
                     err_msg=f"Companion={companion} branch failed at {j}.",
+                    rtol=RTOL,
+                    atol=ATOL,
                 )
                 assert root.size == unique_root.size
             except AssertionError as e:
@@ -321,7 +339,7 @@ class TestPolyUtils:
                         # ok to keep both double roots here because they are
                         # one red and one green since they lie on opposite
                         # sides of the true double root.
-                        assert np.allclose(root, (-3, 2, 2))
+                        assert np.allclose(root, (-3, 2, 2), atol=max(1e-8, 100 * EPS))
                     else:
                         # also okay to remove both
                         assert root.size == 1 and np.allclose(root, -3)
@@ -333,7 +351,7 @@ class TestPolyUtils:
         r = r[~np.isnan(r)]
         unique_r = np.unique(np.roots(c))
         assert r.size == unique_r.size
-        np.testing.assert_allclose(r, unique_r)
+        np.testing.assert_allclose(r, unique_r, rtol=RTOL, atol=ATOL)
 
     @pytest.mark.unit
     @pytest.mark.parametrize("der", [0, 1])

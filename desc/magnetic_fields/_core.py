@@ -931,7 +931,7 @@ class ScaledMagneticField(_MagneticField, Optimizable):
     _static_attrs = _MagneticField._static_attrs + Optimizable._static_attrs
 
     def __init__(self, scale, field):
-        scale = jnp.float64(float(np.squeeze(scale)))
+        scale = jnp.asarray(float(np.squeeze(scale)), float)
         assert isinstance(
             field, _MagneticField
         ), "field should be a subclass of MagneticField, got type {}".format(
@@ -951,7 +951,7 @@ class ScaledMagneticField(_MagneticField, Optimizable):
 
     @scale.setter
     def scale(self, new):
-        self._scale = jnp.float64(float(np.squeeze(new)))
+        self._scale = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     # want this class to pretend like its the underlying field
     def __getattr__(self, attr):
@@ -1284,8 +1284,8 @@ class ToroidalMagneticField(_MagneticField, Optimizable):
     _static_attrs = _MagneticField._static_attrs + Optimizable._static_attrs
 
     def __init__(self, B0, R0):
-        self.B0 = jnp.float64(float(np.squeeze(B0)))
-        self.R0 = jnp.float64(float(np.squeeze(R0)))
+        self.B0 = jnp.asarray(float(np.squeeze(B0)), dtype=float)
+        self.R0 = jnp.asarray(float(np.squeeze(R0)), dtype=float)
 
     @optimizable_parameter
     @property
@@ -1295,7 +1295,7 @@ class ToroidalMagneticField(_MagneticField, Optimizable):
 
     @R0.setter
     def R0(self, new):
-        self._R0 = jnp.float64(float(np.squeeze(new)))
+        self._R0 = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     @optimizable_parameter
     @property
@@ -1305,7 +1305,7 @@ class ToroidalMagneticField(_MagneticField, Optimizable):
 
     @B0.setter
     def B0(self, new):
-        self._B0 = jnp.float64(float(np.squeeze(new)))
+        self._B0 = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     def compute_magnetic_field(
         self,
@@ -1439,7 +1439,7 @@ class VerticalMagneticField(_MagneticField, Optimizable):
 
     @B0.setter
     def B0(self, new):
-        self._B0 = jnp.float64(float(np.squeeze(new)))
+        self._B0 = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     def compute_magnetic_field(
         self,
@@ -1588,7 +1588,7 @@ class PoloidalMagneticField(_MagneticField, Optimizable):
 
     @R0.setter
     def R0(self, new):
-        self._R0 = jnp.float64(float(np.squeeze(new)))
+        self._R0 = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     @optimizable_parameter
     @property
@@ -1598,7 +1598,7 @@ class PoloidalMagneticField(_MagneticField, Optimizable):
 
     @B0.setter
     def B0(self, new):
-        self._B0 = jnp.float64(float(np.squeeze(new)))
+        self._B0 = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     @optimizable_parameter
     @property
@@ -1608,7 +1608,7 @@ class PoloidalMagneticField(_MagneticField, Optimizable):
 
     @iota.setter
     def iota(self, new):
-        self._iota = jnp.float64(float(np.squeeze(new)))
+        self._iota = jnp.asarray(float(np.squeeze(new)), dtype=float)
 
     def compute_magnetic_field(
         self,
@@ -2620,8 +2620,8 @@ def field_line_integrate(
     field,
     params=None,
     source_grid=None,
-    rtol=1e-8,
-    atol=1e-8,
+    rtol=None,
+    atol=None,
     max_steps=None,
     min_step_size=1e-8,
     solver=Tsit5(),
@@ -2650,7 +2650,8 @@ def field_line_integrate(
         Collocation points used to discretize source field.
     rtol, atol : float
         relative and absolute tolerances for PID stepsize controller. Not used if
-        ``stepsize_controller`` is provided.
+        ``stepsize_controller`` is provided. Defaults to 1e-8, or 100 times the
+        machine precision if that is larger.
     max_steps : int
         maximum number of steps for the integration. Defaults to
         abs((phis[-1] - phis[0]) * 1000)
@@ -2698,6 +2699,8 @@ def field_line_integrate(
 
     r0, z0, phis = map(jnp.asarray, (r0, z0, phis))
     assert r0.shape == z0.shape, "r0 and z0 must have the same shape"
+    rtol = setdefault(rtol, max(1e-8, 100 * jnp.finfo(r0.dtype).eps))
+    atol = setdefault(atol, max(1e-8, 100 * jnp.finfo(r0.dtype).eps))
 
     min_step_size = jnp.where(
         phis[-1] > phis[0], min_step_size, -jnp.abs(min_step_size)

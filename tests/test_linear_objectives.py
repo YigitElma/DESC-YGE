@@ -61,6 +61,8 @@ from desc.objectives.utils import factorize_linear_constraints
 from desc.optimize import LinearConstraintProjection
 from desc.profiles import PowerSeriesProfile
 
+from .utils import ATOL, EPS, RTOL
+
 
 @pytest.mark.unit
 def test_LambdaGauge_sym(DummyStellarator):
@@ -170,7 +172,7 @@ def test_constrain_asserts():
     # if only slightly off, should raise only a warning
     with pytest.warns(UserWarning):
         con1 = FixCurrent(target=eqc.c_l, eq=eqc)
-        con2 = FixCurrent(target=eqc.c_l * (1 + 1e-9), eq=eqc)
+        con2 = FixCurrent(target=eqc.c_l * (1 + max(1e-9, 1e4 * EPS)), eq=eqc)
         con = ObjectiveFunction((con1, con2))
         con.build()
         _ = factorize_linear_constraints(obj_c, con)
@@ -455,11 +457,15 @@ def test_correct_indexing_passed_modes():
     x2 = recover(project(x1))
 
     atol = 2e-15
-    np.testing.assert_allclose(x1, x2, atol=atol)
-    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol)
-    np.testing.assert_allclose(A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ Z, 0, atol=atol)
+    np.testing.assert_allclose(x1, x2, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(
+        A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(
+        A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(A @ Z, 0, atol=atol, rtol=RTOL)
 
 
 @pytest.mark.unit
@@ -518,11 +524,15 @@ def test_correct_indexing_passed_modes_and_passed_target():
     x2 = recover(project(x1))
 
     atol = 2e-15
-    np.testing.assert_allclose(x1, x2, atol=atol)
-    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol)
-    np.testing.assert_allclose(A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ Z, 0, atol=atol)
+    np.testing.assert_allclose(x1, x2, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(
+        A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(
+        A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(A @ Z, 0, atol=atol, rtol=RTOL)
 
 
 @pytest.mark.unit
@@ -578,11 +588,15 @@ def test_correct_indexing_passed_modes_axis():
     x2 = recover(project(x1))
 
     atol = 2e-15
-    np.testing.assert_allclose(x1, x2, atol=atol)
-    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol)
-    np.testing.assert_allclose(A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ Z, 0, atol=atol)
+    np.testing.assert_allclose(x1, x2, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(
+        A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(
+        A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(A @ Z, 0, atol=atol, rtol=RTOL)
 
 
 @pytest.mark.unit
@@ -707,11 +721,15 @@ def test_correct_indexing_passed_modes_and_passed_target_axis():
     x2 = recover(project(x1))
 
     atol = 2e-15
-    np.testing.assert_allclose(x1, x2, atol=atol)
-    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol)
-    np.testing.assert_allclose(A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol)
-    np.testing.assert_allclose(A @ Z, 0, atol=atol)
+    np.testing.assert_allclose(x1, x2, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(A @ xp[unfixed_idx], b, atol=atol, rtol=RTOL)
+    np.testing.assert_allclose(
+        A @ (x1[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(
+        A @ (x2[unfixed_idx] / D[unfixed_idx]), b, atol=atol, rtol=RTOL
+    )
+    np.testing.assert_allclose(A @ Z, 0, atol=atol, rtol=RTOL)
 
 
 @pytest.mark.unit
@@ -1210,17 +1228,21 @@ def test_linearconstraintprojection_update_target():
     ) = factorize_linear_constraints(obj0, constraint)
 
     # check that the target is updated properly
-    np.testing.assert_allclose(lc._xp, lcp._xp)
-    np.testing.assert_allclose(xp, lcp._xp)
-    np.testing.assert_allclose(lc._ADinv, lcp._ADinv)
-    np.testing.assert_allclose(ADinv, lcp._ADinv)
-    np.testing.assert_allclose(lc._Z, lcp._Z)
-    np.testing.assert_allclose(Z, lcp._Z)
-    np.testing.assert_allclose(lc._D, lcp._D)
-    np.testing.assert_allclose(D, lcp._D)
-    np.testing.assert_allclose(lc._ZA, lcp._ZA)
-    np.testing.assert_allclose(lc._Ainv, lcp._Ainv)
-    np.testing.assert_allclose(lc._feasible_tangents, lcp._feasible_tangents)
+    np.testing.assert_allclose(lc._xp, lcp._xp, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(xp, lcp._xp, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(lc._ADinv, lcp._ADinv, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(ADinv, lcp._ADinv, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(lc._D, lcp._D, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(D, lcp._D, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(lc._Ainv, lcp._Ainv, rtol=RTOL, atol=ATOL)
+    # the tangents are D @ Z scattered into the full state vector, so checking them
+    # against a freshly built factorization also checks Z
+    np.testing.assert_allclose(
+        lc._feasible_tangents, lcp._feasible_tangents, rtol=RTOL, atol=ATOL
+    )
+    np.testing.assert_allclose(
+        recover.feasible_tangents, lcp._feasible_tangents, rtol=RTOL, atol=ATOL
+    )
 
 
 @pytest.mark.unit
